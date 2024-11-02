@@ -1,62 +1,56 @@
-## 一、当前版本
+## 1. Current Version
 
 ### V1.3.3
 
-见顶部预览图。
+See preview image at the top.
 
-* 调整中文手写字体`Whiteboard/Virgil.woff2`中的部分字形（字母和部分常用符号）。
-* 处理样式问题：在当前最新版笔记软件(V3.1.8)，将文档嵌入白板时，文档中的代码部分未正常换行。
+* Adjusted some glyphs (letters and commonly used symbols) in the Chinese handwritten font `Whiteboard/Virgil.woff2`.
+* Fixed a style issue: in the latest version of the note-taking software (V3.1.8), code sections in documents embedded in the whiteboard were not wrapping properly.
 
-字形这个比较主观，如果不适应替换后的版本，可以替换回之前的字体文件。
+The font adjustment is subjective; if you don't prefer the updated version, you can revert to the previous font file.
 
-至于代码块样式，我在用的V3.0.3其实没有这个问题，可能是受到版本改动的影响，所以需要适配一下。
-
+Regarding code block style, I found no issues in V3.0.3, but it may be impacted by updates, so adaptation is needed.
 
 ---
 
+For the current version: **V1.3.3**
 
-对于当前版本：**V1.3.3**
-
-如果你**不想默认开启自动保存功能**，可以使用VS Code之类的编辑器打开挂件文件夹`Whiteboard`​——`index.js`​，
-
-搜索：
+If you **do not want auto-save to be enabled by default**, open the widget folder `Whiteboard` -> `index.js` in an editor like VS Code and search for:
 
 ```js
 window._autoSave = true;
 ```
 
-改成：
+Then change it to:
 
 ```js
 window._autoSave = false;
 ```
 
-如果你想**调整自动保存的延时时间**（默认是2000ms），可以打开挂件文件夹`Whiteboard`​——`assets`​——`index-c894b550.js`​
-
-搜索：
+To **adjust the auto-save delay time** (default is 2000ms), open `Whiteboard` -> `assets` -> `index-c894b550.js` in the widget folder and search for:
 
 ```js
 window._isDarwin?document.dispatchEvent(new KeyboardEvent("keydown",{key:"S",metaKey:!0,bubbles:!1})):document.dispatchEvent(new KeyboardEvent("keydown",{key:"S",ctrlKey:!0,bubbles:!1}))},2000));
 ```
 
-将最后那个数值：2000 改成你想设置的数值即可，单位是毫秒。
+Change the last value `2000` to your preferred time (in milliseconds).
 
 ---
 
-## 二、简介
+## 2. Overview
 
-一个基于[Excalidraw](https://github.com/excalidraw/excalidraw)的挂件，嵌入后会自动铺满文档，将一个文档当成一个白板。融合了块悬浮预览、关键词搜索定位、画板内不同元素之间的跳转等小功能。
+A widget based on [Excalidraw](https://github.com/excalidraw/excalidraw) that, once embedded, fills the document space, treating a document as a whiteboard. It includes minor features like block hover preview, keyword search and location, and element jumping within the board.
 
-可通过引用文档的方式来引用白板。如果需要将画好的白板导出并分享给别人，可以使用白板所在文档的导出/导入`SiYuan .sy.zip`​文件的功能。每个白板绑定一个存储在`assets/ExcalidrawFiles/`中的文件，文档删除后白板绑定的文件也会作为【未引用的资源】来方便手动删除。
+You can embed a whiteboard by referencing the document. To export and share a whiteboard, use the export/import `SiYuan .sy.zip` function. Each whiteboard binds to a file stored in `assets/ExcalidrawFiles/`, which can be deleted manually as an unreferenced resource if the document is removed.
 
-## 三、使用前的设置
+## 3. Pre-Usage Setup
 
-### 1、添加CSS代码片段
+### 1. Add CSS Snippet
 
-白板创建时，会自动设置所在文档的属性——`别名`​​的值为：`whiteboard`​​，这是为了解决打开白板所在文档时页面闪现出文档标题的问题。相应的，你需要在笔记软件的`设置`​​——`外观`​​中添加对应的CSS代码片段：
+When creating a whiteboard, the widget sets the document's `Alias` property to `whiteboard` to avoid flashing document titles upon opening. You'll need to add a corresponding CSS snippet in `Settings` -> `Appearance`:
 
 ```css
-/* 白板挂件——隐藏当前文档的标题、面包屑 */
+/* Whiteboard widget - Hide the title and breadcrumbs of the current document. */
 .protyle-title.protyle-wysiwyg--attr:has(+ .protyle-wysiwyg.protyle-wysiwyg--attr[alias="whiteboard"]){
    display: none !important;
 }
@@ -65,37 +59,37 @@ window._isDarwin?document.dispatchEvent(new KeyboardEvent("keydown",{key:"S",met
    display: none !important;
 }
 
-/* 如果是新版本，比如SiYuan V3.0.16，还需要以下片段 */
+/* If it is a new version, such as SiYuan V3.0.16, the following snippet is also needed. */
 .protyle-top:has(+ .protyle-wysiwyg.protyle-wysiwyg--attr[alias="whiteboard"]){
    display: none !important;
 }
 ```
 
-为了美观，还需要隐藏掉挂件默认的边框以及处理拖拽线等：
+For better visuals, remove the default border and handle the dragging line as follows:
 
 ```css
-/* 挂件——去掉边框 */
+/* Widget – Remove Border */
 .b3-typography iframe, .protyle-wysiwyg iframe {
     border: none;   
 }
-/* 处理在白板文档中，文档树右侧（调整页面宽度）的拖拽线被遮挡的问题 */
+/* Fix issue with document tree drag line on the right side in the whiteboard */
 .layout__resize--lr {
     z-index: 3;
 }
-/* 白板文档作为嵌入块嵌入到其他文档时——隐藏底边可能出现的空白行 */
+/* Hide possible blank line when embedding a whiteboard in other documents */
 .protyle-wysiwyg__embed > .iframe[custom-data-assets^="assets/ExcalidrawFiles/"] + .p{
      display:none;
 }
-/* 处理问题：挂件铺满文档的过程中，左侧出现明显闪烁的输入光标。 */
+/* Fix input cursor flicker when filling the document */
 .iframe ,iframe{
     -webkit-user-modify: read-only;
 }
 ```
 
-还有一个可选的样式，是设置悬浮窗大小的，个人感觉默认的窗口有点过于宽了才设置的，这个不重要，你可以根据自己的需要来决定是否添加。
+Another optional style adjustment controls the floating window size if you feel the default window width is too wide:
 
 ```css
-/* 悬浮窗口 */
+/* Floating Window */
 .block__popover {
     width: 735px;
     border: 1px solid #94949482;
@@ -104,11 +98,11 @@ window._isDarwin?document.dispatchEvent(new KeyboardEvent("keydown",{key:"S",met
 }
 ```
 
-### 2、添加JS代码片段
+### 2. Add JavaScript Snippet
 
-可通过拖拽的方式快速往白板中嵌入文档/块。
+You can quickly embed documents/blocks into the whiteboard via drag-and-drop.
 
-需要在笔记软件的`设置`​——`外观`​中添加对应的JS代码片段来辅助获取当前拖拽块的ID——详情见文档底部`更新记录`​中关于挂件`V1.1.0`​的更新说明。
+Add a JavaScript snippet in `Settings` -> `Appearance` to aid in obtaining the current dragged block ID. See the update notes at the bottom under `V1.1.0` for details.
 
 ```js
 document.addEventListener("dragstart", (event) => {
@@ -119,210 +113,140 @@ document.addEventListener("dragstart", (event) => {
     } else {
         window._currentBlockID = null;
     }
-}
-);
+});
 ```
 
-### 3、安装插件【开放 API】
+### 3. Install the "Open API" Plugin
 
-* 安装这个插件是为了能在白板中悬浮预览笔记内块/文档的内容。
-* 在`设置`​​​——`集市`​​​——​`插件`​​​页面，下载并启用插件`开放 API`​​​即可。
+* This plugin enables hover previews of note blocks/documents in the whiteboard.
+* Go to `Settings` -> `Market` -> `Plugins` to download and enable the `Open API` plugin.
 
-‍
+‍  
 
-## 四、开始使用
+## 4. Getting Started
 
-### 1、插入白板
+### 1. Inserting a Whiteboard
 
-下载完挂件后，在新建的空白文档中设置好文档标题后，输入`/g`​并回车，在挂件列表选择`Whiteboard`​即可在当前文档中插入白板，默认铺满文档。
+After downloading the widget, set up a document title in a new blank document, then type `/g` and press Enter. Select `Whiteboard` from the widget list to insert a whiteboard into the document, which fills the entire document by default.
 
-### 2、数据的保存
+### 2. Data Saving
 
-单击左上角的`保存`​​​按钮或者使用快捷键`Ctrl`​​​+`S`​​​来保存白板的数据。左上角会弹出提示：`已保存`​​​​​​​
+Click the `Save` button in the top left corner or use the shortcut `Ctrl + S` to save the whiteboard data. A "Saved" message will pop up in the top left corner.
 
-白板的数据保存在：`assets/ExcalidrawFiles/ `​​​​​文件夹中，文件路径类似于：
+Whiteboard data is saved in the `assets/ExcalidrawFiles/` folder, with file paths resembling:
 
 ```css
 assets/ExcalidrawFiles/20231227015401-w0olmpi.excalidraw
 ```
 
-使用白板挂件块的ID作为文件名。
+The widget uses the block ID as the filename.
 
-* 默认开启`自动保存`​，一般在增、删或移动元素后约2s触发保存。如果想默认关闭自动保存或者调整延时时间，可以参考文档顶部描述的方法。
-* 如果是临时手动开启/关闭自动保存，可以使用快捷键`Alt+F`​（挂件V1.0.8后的版本使用该快捷键，之前的使用`Alt+S`​），左上角会有提示。
+* `Auto-save` is enabled by default, typically saving approximately 2 seconds after adding, deleting, or moving elements. To turn off auto-save by default or adjust the delay time, see the instructions at the top of this document.
+* For temporarily toggling auto-save, use `Alt+F` (versions after V1.0.8 use this shortcut; earlier versions used `Alt+S`). A message will appear in the top left corner.
 
-**编辑完后记得点击保存、记得点击保存、记得点击保存，不然什么都没了。**    我自己比较勤按Ctrl+S，所以目前还没丢过内容。
+**Remember to click save after editing; otherwise, changes might be lost.** Personally, I press Ctrl+S often, so I haven't lost any data yet.
 
-### 3、块超链接的悬浮预览
+### 3. Floating Preview of Block Hyperlinks
 
-* 在白板中插入链接的方式没有变化：先复制一个链接地址（外部链接或者某个块/文档的`块超链接`​​​​​），在画板中点击选中一个元素后按`Ctrl`​​​​​+`K`​​​​​后弹出链接输入框，粘贴链接并回车即可。
-* 值得注意的是，如果插入的是块超链接，并且想在白板中悬浮预览该块的内容，你需要先打开预览开关。先单击白板空白处，然后按快捷键`Alt`​+`Q`​是开启预览，按快捷键`Alt`​+`W`​是关闭预览。默认是关闭的，在开启状态下，鼠标悬浮在白板中某个元素的链接图标上时，能弹出悬浮窗来预览该块的内容，弹出窗口后可通过按`ESC`​键（若不生效可先点击一下预览的文档）或者鼠标点击右上角`X`​来关闭窗口。
+* To insert a link in the whiteboard, copy a link address (external or a `block hyperlink` of a block/document), click an element on the whiteboard, then press `Ctrl + K` to bring up the link input field, paste the link, and press Enter.
+* To enable hovering previews for block hyperlinks, press `Alt + Q` to enable preview mode and `Alt + W` to disable it. When enabled, hovering over a link icon displays a preview window of the block content, which can be closed by pressing `ESC` (click inside the preview if it doesn’t work) or by clicking `X` in the top right corner.
 
-### 4、关键字的搜索、定位
+### 4. Keyword Search and Navigation
 
-* 可通过搜索框来搜索、定位白板内的文字，支持多个关键字（以空格隔开）。想要定位准的话需要画板重置缩放比例为：100%，在左下角设置。
-* 搜索前建议先确认内容已经保存，因为搜索的内容是从保存的白板文件中读取的，如果你新增了内容且没保存，那么搜索到的结果可能是不全的。
-* 先单击白板空白处获得焦点，然后按快捷键​`Alt`​​+`T`​​​​就可以唤出/关闭搜索框。唤出后点击白板空白处也可以关闭搜索框。
-* 唤出的搜索框自动获取焦点，此时可以直接输入要查询的关键字，关键字之间以空格隔开，匹配到的结果会在约0.5s后显示在下方列表中。
-* 弹出匹配的结果后，搜索框仍获得焦点，此时通过键盘的上、下方向键可以切换并定位匹配结果的位置。当然， 你还可以直接鼠标单击某个匹配的结果来定位它的位置。
+* Use the search box to locate text on the whiteboard, supporting multiple keywords (separated by spaces). Reset the whiteboard zoom to 100% for precise positioning, which can be set in the bottom left corner.
+* Before searching, ensure content is saved, as searches pull from the saved whiteboard file.
+* Press `Alt + T` to open/close the search box after clicking on a blank spot on the whiteboard. Clicking on the whiteboard closes the search box as well.
+* The search box focuses automatically; type keywords (separated by spaces), and matching results display in about 0.5s.
+* Use the up and down arrow keys to navigate matching results or click a result directly for navigation.
 
-### 5、白板内元素之间的跳转
+### 5. Jumping Between Elements Within the Whiteboard
 
-* 比如：画板内要从元素A跳转到元素B。（此时画板缩放比例为：100%）
-* 先选中元素B，按​`Ctrl`​​​​+​`C`​​​​来复制该元素，然后单击选中元素A，按住​`Ctrl`​​​​后，依次按​`J`​​​​、​`K`​​​​、​`V`​​​​后回车，即可生成链接。
+* For example: Jumping from element A to element B within the whiteboard. (At this time, the whiteboard zoom ratio is: 100%).
+* First select element B and press ​`Ctrl`​​​​+​`C`​​​ to copy this element. Then click to select element A. After holding down `Ctrl`, press ​`J`​​​​,​`K`​​​​,​`V` in sequence and then press Enter to generate a link.
 
-  * 这个过程中，​`Ctrl`​​​​+​`J`​​​​是从刚刚复制的元素中获取元素ID，生成类似：`excalidraw://nFrmqWgyT-lXdsS15Yswu`​​​​这样的链接并复制到剪切板，此时左上角会提示：已将链接复制到剪切板。
-  * 后面的​`Ctrl`​​​​+​`K`​​​​弹出链接输入框，​`Ctrl`​​​​+`V`​​​​粘贴就是常规的插入链接的方式了。
-* 单击元素A上的链接图标，即可跳转到元素B的位置。（只适用于画板内，在画板外使用该链接并不能跳转）
-* 如果跳转失败，可以先点击下【保存】按钮后再试试。
+  * In this process, ​`Ctrl`​​​​+​`J` is to obtain the element ID from the just copied element and generate a link like: `excalidraw://nFrmqWgyT-lXdsS15Yswu`​​​ and copy it to the clipboard. At this time, a prompt will appear in the upper left corner: The link has been copied to the clipboard.
+  * The subsequent `Ctrl`​​​​+​`K` pops up the link input box, and ​`Ctrl`​​​​+`V` pasting is the regular way to insert a link.
+* Click the link icon on element A to jump to the position of element B. (Only applicable within the whiteboard. Using this link outside the whiteboard cannot perform the jump.)
+* If the jump fails, you can click the【Save】button first and then try again.
 
-## 五、其他可选的配置
 
-### 1、手动更改画笔的粗细
 
-对于版本V1.3.3，打开挂件文件夹`Whiteboard`​——`assets`​——`index-c894b550.js`​,在该js文件中搜索：
+## 5. Other Optional Configurations
+
+### 1. Adjust Brush Thickness Manually
+
+For V1.3.3, open `Whiteboard` -> `assets` -> `index-c894b550.js` and search for:
 
 ```css
 simulatePressure:e.simulatePressure,size:e.strokeWidth*1.2,thinning
 ```
 
-那个1.2是现在设置的值（已经相对小了），最开始的默认值是4点几，你可以根据自己需要更改这个值的大小来修改画笔的粗细。
+1.2 is the current value (already reduced). The initial default was over 4; adjust this value as desired.
 
-### 2、设置固定端口（Windows端）
+### 2. Set Fixed Port (Windows)
 
-如果白板的`素材库`​​​​用的比较多的话，最好设置笔记的固定端口启动，因为添加进素材库的内容都是存到LocalStorage中的，设置后已添加到素材库的内容就不会在下一次启动后不显示了。
-
-鼠标右键笔记桌面图标——`属性`​​​​——`快捷方式`​​​​——`目标(T)`​​​​，在`目标(T)`​​​​这栏的输入框中，是思源笔记可执行文件的路径，比如：
+If the `material library` of the whiteboard is used frequently, it is best to set a fixed port for starting the notebook. Because the content added to the material library is stored in LocalStorage. After setting this, the content that has been added to the material library will not disappear after the next startup.
+Right-click the notebook desktop icon -> `Properties` -> `Shortcut` -> `Target (T)`. In the input box of `Target (T)`, it is the path of the executable file of SiYuan Note. For example:
 
 ```css
 D:\Siyuan\SiYuan.exe
 ```
 
-在后面指定端口即可，比如：
+Just set the port at the back. For example:
 
 ```css
 D:\Siyuan\SiYuan.exe  --port=6806
 ```
 
-
-‍
-‍
-
-## 六、更新记录
-
-### V1.0.0
-
-* 首次提交
-
-### V1.0.1
-
-* 修复问题：[将白板以嵌入块形式嵌入到其他文档时显示不完全](https://github.com/BryceAndJuly/Whiteboard/issues/1)
-
-### V1.0.2
-
-* **修复问题：禁用白板默认的自动聚焦功能；**
-
-白板默认的自动聚焦行为会导致页面中出现抢焦点的问题。具体表现为：
-
-* 在搜索界面，当结果预览界面出现白板时，焦点会转移到画板，导致搜索输入框失去焦点。如果需要继续输入关键词，你需要重新点一下输入框后才能继续输入，这点非常烦人。禁用后则无此问题。
-* 在含有白板所在文档的嵌入块的页面中，白板的自动聚焦会跟笔记软件本身的【滚动到上次浏览位置】冲突，导致页面不能滚动到上次浏览的位置。
-
-### V1.0.3
-
-* 默认开启自动保存功能，编辑结束1.5s后自动保存数据。
-
-> 如果觉得弹窗太分散注意力，可以点击空白处后，使用快捷键Alt+S开启/关闭【自动保存功能】，左上角会有消息提示。  
-> 一般会在初始化时，增、删或移动元素时触发自动保存。
-
-### V1.0.4
-
-* 减少自动保存时弹窗的干扰。
-
-> 触发自动保存时不弹出【已保存】的消息提醒；
->
-> 手动点击保存按钮、键盘上按Ctrl+S依旧保留弹窗提醒。
-
-### V1.0.5
-
-* 去掉刚打开白板时触发的那次自动保存，减少不必要的性能消耗，这样打开白板时更流畅些。
-* 处理问题：在macOS端保存按钮失效的问题。
-
-### V1.0.6
-
-* 修复问题：在移动端，白板文档作为嵌入块时显示不全。【之前修复的部分是PC端的，忘了移动端，最近看到才发现】。
-* 在白板文档中，文档树右侧（调整页面宽度）的拖拽线被遮挡。
-
-这个问题添加CSS片段即可，白板的z-index层级不能再调低了，不然有时遮不住挂件的块标，会很难看，所以可以把拖拽线的层级调高。
-
-```js
-.layout__resize--lr {
-    z-index: 3;
-}
-```
-
-* 自动保存的延时默认值调整为2500ms。
-
-> 虽然有防抖，但是之前设置的默认值1.5s还是太小了，可能造成卡顿等问题，而且最近使用的时候发现，白板上鼠标右键弹出的菜单如果碰上自动保存会收起来。所以如果碰上卡顿或者鼠标右键弹出的菜单被收起，建议关掉自动保存（快捷键`Alt`​+`S`​）。
-
-### V1.0.7
-
-* 前面的版本打开白板时还是有几个重复的加载消耗，这个版本主要是删除掉那些冗余部分。这版打开应该会流畅些。
+## 6. Update records
 
 ### V1.0.8
 
-* Excalidraw版本升级，0.15.0——>0.17.0
-* 支持嵌入笔记内文档（预览的形式，不可编辑），效果见顶部那个预览图。
+* Excalidraw version upgrade,0.15.0——>0.17.0
+* Support embedding documents within notes (in preview form, not editable). See the preview image at the top for the effect.
 
-  > 基本用法：
+  > Basic usage:
   >
-  > * 白板顶部工具栏有个【嵌入网页】的功能，点击后按住鼠标拖拽出一个Web-Embed的框，然后把笔记内的块超链接【形如：siyuan://blocks/20200812220555-lj3enxa】粘贴进链接框并回车，然后**随便挪动一下鼠标**就开始渲染那个块/文档了。
-  > * 在Web-Embed框里要滚动页面查看内容的话，需要先把鼠标挪到框中央并点击按钮【点击开始交互】，框里的块引用、超链接点击能跳转。
-  > * 预览的文档里有些块还没处理，像公式、HTML块、Mermaid、嵌入块等，但目前用来看个大概还是可以的。
-  > * 如果刚打开白板或者刷新后看到那个Web-Embed框是空白的，只需要在白板里随便挪一下鼠标就开始渲染了。
-  > * Web-Embed框的边角建议用直角，有弧度的那个边角可能会导致文档模糊。
-  > * 预览的文档所用的主题样式就在挂件文件夹`Whiteboard\theme\theme.css`​里。
+  > * There is a function of "Embed Web Page" in the top toolbar of the whiteboard. After clicking, drag out a Web-Embed box by holding the mouse. Then paste the block hyperlink within the note [in the form of: siyuan://blocks/20200812220555-lj3enxa] into the link box and press Enter. Then move the mouse casually and the rendering of that block/document will start.
+  > * To scroll through the page to view the content in the Web-Embed box, you need to move the mouse to the center of the box and click the button "Click to start interaction". Block references and hyperlinks in the box can be clicked to jump.
+  > * Some blocks in the previewed document are not processed yet, such as formulas, HTML blocks, Mermaid, embedded blocks, etc. 
+  > * If you just open the whiteboard or see that the Web-Embed box is blank after refreshing, just move the mouse casually in the whiteboard and the rendering will start.
+  > * The corners of the Web-Embed box are recommended to be right angles. The corner with a radian may cause the document to be blurry.
+  > * The theme style used by the previewed document is in the widget folde`Whiteboard\theme\theme.css`​
   >
-* 去掉【清除文字之间的空格】功能；
-* 自动保存延时改为2s，自动保存也会弹窗提醒（不提醒一下都不知道有没有保存），同时为了减少干扰，已将弹窗的颜色调的很淡。
-* 自动保存开启/关闭的快捷键改为`Alt`​+`F`​，主要是因为新版的`Alt`​+`S`​快捷键被功能【吸附至对象】占用了。
-* 白板文档作为嵌入块出现在其他文档时，底部可能有空行，让白板看起来不好看，可用CSS片段来隐藏掉：
 
-```js
-   /* 白板嵌入块——隐藏底边的空白行 */
-   .protyle-wysiwyg__embed > .iframe[custom-data-assets^="assets/ExcalidrawFiles/"] + .p{
-     display:none;
-   }
-```
+* The delay time for auto-save is changed to 2 seconds. Auto-save will also prompt with a pop-up window (without a prompt, you wouldn't know if it has been saved). At the same time, in order to reduce interference, the color of the pop-up window has been adjusted very lightly.
+* The shortcut key for turning on/off auto-save is changed to `Alt`​+`F`. Mainly because the shortcut key `Alt`​+`S` in the new version is occupied by the function "Adsorb to object".
 
 ---
 
 ### V1.0.9
 
-* 修复样式问题：在移动端，【保存】、【刷新】按钮无法自动调整位置导致被遮挡。
-* 关于全屏快捷键在Excalidraw V0.17.0被移除的问题 。新增全屏快捷键`Alt`​+`Y`​，这个快捷键跟笔记里其他文档的全屏快捷键保持一致，点击白板空白处后，按该快捷键可进入/退出全屏模式。
+* Fixed a style issue: On mobile devices, the "Save" and "Refresh" buttons cannot automatically adjust their positions and are blocked.
+* Regarding the issue of the full-screen shortcut being removed in Excalidraw V0.17.0. A new full-screen shortcut Alt+Y is added. This shortcut is consistent with the full-screen shortcuts of other documents in the note. After clicking on a blank area of the whiteboard, pressing this shortcut can enter/exit full-screen mode.
 
-**Web-Embed相关**：
+**Web-Embed related**
 
-* 如果嵌入的是文档的块超链接，则自动插入文档标题。
-* 预览文档中支持渲染katex公式、Mermaid。
-* 对于预览文档中的嵌入块，就不继续查询渲染了，处理为直接显示对应的SQL 文本。
+* If a block hyperlink of a document is embedded, the document title is automatically inserted.
+* In the Web-Embed document, rendering of Katex  and Mermaid is supported.
+* For embedded blocks in the Web-Embed document, further query and rendering are not performed. Instead, the corresponding SQL text is directly displayed.
 
 ---
 
 ### V1.1.0
 
-* 样式调整：对`Web-Embed`​中嵌入的文档，基础字体大小从14px调整为16px。
-* 支持通过拖拽的方式快速嵌入文档/块。
+* Style adjustment: For the documents embedded in`Web-Embed`​, the basic font size is adjusted from 14px to 16px.
+* Support quickly embedding documents/blocks by dragging.
 
-  > * 需要先添加一个JS代码片段来辅助获取当前拖拽块的ID。（见下方的代码块），在笔记软件的<kbd>设置</kbd>​——<kbd>外观</kbd>​——<kbd>代码片段</kbd>​——<kbd>JS</kbd>​中添加。
-  > * 1、使用拖拽方式来嵌入文档
+  > * It is necessary to add a JS code snippet first to assist in obtaining the ID of the currently dragged block. (See the code block below). Add it in the <kbd>Settings</kbd> - <kbd>Appearance</kbd> - <kbd>Code Snippet</kbd> - <kbd>JS</kbd> of the note-taking software.
+  > * 1、Use dragging to embed a document.
   >
-  >   * 在文档树，鼠标左键按住文档后往白板拖拽即可。
-  > * 2、使用拖拽方式来嵌入块
+  >   * In the document tree, hold down the left mouse button on the document and drag it to the whiteboard.
+  > * 2、Use dragging to embed a block.
   >
-  >   * 建议先分屏，白板在左侧，文档在右侧。（白板此时建议开启`禅模式`​，以减少编辑栏弹出带来的干扰）
-  >   * 文档处于编辑状态。
-  >   * 鼠标悬浮在块上方时，块的左上角显示块标，鼠标左键按住块标后往白板拖拽即可。
+  >   * It is recommended to split the screen first. The whiteboard is on the left and the document is on the right. (At this time, it is recommended to enable Zen Mode for the whiteboard to reduce the interference caused by the pop-up of the editing bar.)
+  >   * The document is in edit state.
+  >   * When the mouse hovers over a block, the block mark is displayed in the upper left corner of the block. Hold down the left mouse button on the block mark and drag it to the whiteboard.
   >
 
 ```js
@@ -342,47 +266,44 @@ document.addEventListener("dragstart", (event) => {
 
 ### V1.2.0
 
-* 删掉sourcemap文件，减小挂件包的体积。
-* 预览文档中支持渲染嵌入块。
-* 预览文档中支持渲染数据库表格视图（Database table view）。
-* 优化消息弹窗，加上时间戳并在样式上减少干扰，保留最后一个通知。
-* 白板中预览文档的样式调整：减少文档内边距（边缘空白），theme.css中引入了超链接图标。
+* Delete the sourcemap file to reduce the size of the widget package.
+* Support rendering embedded blocks in Web-Embed documents.
+* Support rendering database table views in Web-Embed documents.
+* Optimize the message pop-up window, add a timestamp and reduce interference in style, and retain the last notification.
+* Style adjustment for Web-Embed documents in the whiteboard: Reduce the document padding (edge whitespace), and introduce hyperlink icons in theme.css.
 
 Tips:
 
-1. 预览文档如果在翻页或者鼠标滚动过程中出现模糊，可以先把鼠标移出`Web-Embed`​框来恢复清晰度。
-2. 如果预览文档中有Mermaid图表，建议保存的时候让对应的文档处于白板可视区域内（通过白板的缩小等方式），这样下次打开的时候能保证正常渲染。
-3. 在白板中渲染数据库表格视图的时候虽然没有滚动条，但是可以通过`shift`​+鼠标滚轮的方式来横向滚动查看数据表格。
+1. If the Web-Embed document appears blurry during page turning or mouse scrolling, you can move the mouse out of the `Web-Embed` box to restore clarity.
+2. If there is a Mermaid chart in the Web-Embed document, it is recommended to keep the corresponding document within the visible area of the whiteboard when saving (by zooming out the whiteboard, etc.), so that it can be guaranteed to render normally next time it is opened.
+3. When rendering a database table view in the whiteboard, although there is no scroll bar, you can use `shift` + mouse wheel to scroll horizontally to view the data table.
 
 ---
 
 ### V1.2.1
 
-调试时对应的笔记版本：`V3.0.3`​
+Fix data table rendering issues in Web-Embed documents:
 
-修复预览文档中的数据表格渲染问题：
+* When custom icons (non-default icons) are used for table headers, it will cause the table rendering to fail.
+* Links in the "Hyperlink" column cannot be jumped to after clicking.
+* The cell content in the "Association" column cannot be rendered normally.
+* The "Creation Time" and "Update Time" columns will cause the table rendering to fail.
 
-* 表头使用自定义图标（非默认图标）时会导致该表格渲染失败。
-* 【超链接】列的链接点击后无法跳转。
-* 【关联】列单元格内容未能正常渲染
-* 【创建时间】、【更新时间】列会导致该表格渲染失败。
+Style modifications:
 
-样式修改：
-
-* 【保存】、【刷新】按钮字号调小，跟旁边的【素材库】保持一致，看起来协调一点。
-* 拖拽进白板的嵌入文档：文档边框颜色调淡一点（由`#1e1e1e`​调为`#c0c0c0`​）
-* 拖拽进白板的嵌入文档：边角默认用直角，不再跟随当前状态，避免出现文档模糊的问题。
-
+* Reduce the font size of the "Save" and "Refresh" buttons to be consistent with the adjacent "Material Library" for a more coordinated look.
+* For embedded documents dragged into the whiteboard: Lighten the color of the document border (changed from #1e1e1e to #c0c0c0).
+* For embedded documents dragged into the whiteboard: By default, use right angles for the corners and no longer follow the current state to avoid the problem of document blurriness.
 
 ### V1.3.0
 
-* 白板中的嵌入文档支持代码高亮，见顶部预览图。
-* 处理在当前版本（SiYuan V3.0.16）中，隐藏白板所在文档标题的CSS代码片段失效的问题。
+* Embedded documents in the whiteboard support code highlighting. See the preview image at the top.
+* Deal with the issue of the CSS code snippet for hiding the document title where the whiteboard is located being ineffective in the current version (SiYuan V3.0.16).
 
-之前隐藏白板所在文档标题的CSS片段是：
+The previous CSS snippet for hiding the document title where the whiteboard is located was:
 
 ```css
-/* 白板挂件——隐藏当前文档的标题、面包屑 */
+/* Whiteboard widget - Hide the title and breadcrumbs of the current document */
 .protyle-title.protyle-wysiwyg--attr:has(+ .protyle-wysiwyg.protyle-wysiwyg--attr[alias="whiteboard"]){
  display: none !important;
 }
@@ -392,7 +313,7 @@ Tips:
 }
 ```
 
-由于新版笔记软件的改动，需要再加上：
+Due to the changes in the new version of the note-taking software, the following needs to be added:
 
 ```css
 .protyle-top:has(+ .protyle-wysiwyg.protyle-wysiwyg--attr[alias="whiteboard"]){
@@ -400,13 +321,14 @@ Tips:
 }
 ```
 
+
 ### V1.3.1
 
-这版在上一版本(V1.3.0)的基础上，只更新了CSS片段来适配思源笔记当前最新版本（V3.1.5），其他并无升级。如果你已经下载了V1.3.0，那么只需要微调CSS片段即可，**无需下载更新**。
+This version, on the basis of the previous version (V1.3.0), only updates the CSS snippet to adapt to the current latest version of SiYuan Note (V3.1.5). There are no other upgrades. If you have already downloaded V1.3.0, then you only need to fine-tune the CSS snippet and there is no need to download and update.
 
-1、处理问题：挂件铺满文档的过程中，左侧出现明显闪烁的输入光标。
+1、Deal with the problem: During the process of the widget covering the document, a clearly flickering input cursor appears on the left side.
 
-需要添加一个CSS片段。在<kbd>设置（Alt+P）</kbd>——<kbd>外观</kbd>——<kbd>代码片段</kbd>——<kbd>CSS</kbd>界面，添加以下CSS：
+A CSS snippet needs to be added. In the <kbd>Settings （Alt+P）</kbd>——<kbd>Appearance</kbd>——<kbd>Code Snippet</kbd>——<kbd>CSS</kbd>interface, add the following CSS:
 
 ```css
 .iframe ,iframe{
@@ -414,34 +336,29 @@ Tips:
 }
 ```
 
-
-2、微调隐藏面包屑和文档标题的CSS片段（将` visibility: hidden;`改为`display: none !important;`）以减少挂件所在文档中面包屑的闪烁。见上文中
-`三、使用前的设置`——`1、添加CSS代码片段`章节。
-
-
 ### V1.3.2
-* 保存时自动将白板中的文本内容写入到所在文档的`属性`——`备注`中。
+* When saving, automatically write the text content in the whiteboard into the `Properties` - `memo` of the document it is in.
 
-这样做的好处是：在全局搜索、引用块搜索、嵌入块搜索中，除了通过白板的文档名、别名外，现在还可以通过白板中已输入的文本来检索并命中白板文档。
+The benefit of this is that in global search, reference block search, and embedded block search, in addition to searching by the document name and alias of the whiteboard, now you can also retrieve and hit the whiteboard document through the text already entered in the whiteboard.
 
-当然，如果你不希望白板中的文本参与到全局搜索中，可以手动关闭此功能。
+Of course, if you don't want the text in the whiteboard to participate in global search, you can manually turn off this function.
 
-打开挂件文件夹`Whiteboard`——`index.js`，搜索：
-
+Open the widget folder `Whiteboard` - `index.js`, search for:
 ```js
  window._allowSetMemo = true;
 ```
 
-改成：
+Change it to:
 
 ```js
  window._allowSetMemo = false;
 ```
 
 
-## 七、参考与感谢
 
-* [Excalidraw项目](https://github.com/excalidraw/excalidraw)
+## 7. References and Thanks
+
+* [Excalidraw](https://github.com/excalidraw/excalidraw)
 * [SiYuan](https://github.com/siyuan-note/siyuan)
-* 画板中的中文字体文件拷贝自 [superdraw](https://github.com/zuoez02/superdraw) 项目；
-* 感谢插件【开放 API】的作者[Zuoqiu-Yingyi](https://github.com/Zuoqiu-Yingyi)。
+* The Chinese font file in the whiteboard is copied from the [superdraw](https://github.com/zuoez02/superdraw) project.
+* Thanks to the author [Zuoqiu-Yingyi](https://github.com/Zuoqiu-Yingyi) of the plugin "Open API".
