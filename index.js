@@ -50,7 +50,11 @@ let es_ES = {
   "msgReadFilePathFailed":"Falló en leer el path del archivo de cuadro de lápiz en los atributos del bloque, se actualizará automáticamente tras una actualización manual.",
 }
 
-// 笔记软件设置语言为简体中文、繁体中文时，左上角弹出中文提示，否者弹出英文提示
+// When setting the language of a note-taking software 
+// to Simplified Chinese or Traditional Chinese, 
+// a Chinese prompt will pop up in the upper left corner. 
+// Otherwise, an English prompt will pop up.
+
 window._languages = zh_CN;
 let lang = window.top.siyuan.config.lang;
 switch (lang) {
