@@ -32,21 +32,44 @@ let en_US = {
   "msgSetAliasFailed":"Failed to set document alias.",
   "msgReadFilePathFailed":"Failed to read the path of the whiteboard file in the block attributes, will automatically refresh.",
 }
+let es_ES = {
+  "msgSaved":"Guardado",
+  "msgCopyFailed":"La operación falló, no se pudo copiar el enlace del elemento.",
+  "msgNotElement": "El elemento copiado no es un elemento del lienzo!",
+  "msgIDFailed": "Fallido en obtener el ID del elemento del lienzo.",
+  "msgCopied": "El enlace se ha copiado al portapapeles.",
+  "msgPreviewMode": "Modo de vista previa",
+  "msgPreviewModeOff": "El modo de vista previa ha sido desactivado.",
+  "msgAutoSaveOff": "La función de guardado automático ha sido desactivada!",
+  "msgAutoSaveOn": "Se guardará automáticamente aproximadamente cada 2 segundos después de finalizar la edición.",
+  "msgNoRelevantResults": "No se han encontrado resultados relevantes!",
+  "msgNeedPlugin": "Falló la vista previa en hover, se recomienda instalar el plugin [Open API] primero.",
+  "msgSaveFailed":"Falló el guardado, por favor revisa la consola para obtener los mensajes de error!",
+  "msgGetFileFailed":"Falló en obtener el archivo del lienzo, se creará un nuevo cuadro de lápiz tras una actualización manual.",
+  "msgSetAliasFailed":"Falló en establecer el alias del documento.",
+  "msgReadFilePathFailed":"Falló en leer el path del archivo de cuadro de lápiz en los atributos del bloque, se actualizará automáticamente tras una actualización manual.",
+}
 
 // 笔记软件设置语言为简体中文、繁体中文时，左上角弹出中文提示，否者弹出英文提示
 window._languages = zh_CN;
 let lang = window.top.siyuan.config.lang;
-if (lang === "zh_CN" || lang === "zh_CHT") {
-  window._languages = zh_CN;
-}else{
-  window._languages = en_US;
+switch (lang) {
+  case "zh_CN":
+  case "zh_CHT":
+    window._languages = zh_CN;
+    break;
+  case "es_ES":
+    window._languages = es_ES;
+    break;
+  default:
+    window._languages = en_US;
+    break;
 }
-
 let myMessage = document.getElementById("myMessage");
 let saveBtn = document.getElementById('saveBtn');
 let refreshBtn = document.getElementById('refreshBtn');
 refreshBtn.addEventListener('click', () => { window.location.reload(); })
-// 弹出消息弹窗
+// Pop-up message box
 window.showMessage = function (msg, duration = 2000) {
   let dom = document.createElement('div')
   dom.innerText = msg  + ` (${new Date().toLocaleString()})`;
@@ -58,19 +81,20 @@ window.showMessage = function (msg, duration = 2000) {
     }
   }, duration);
 }
-// 保存时默认将白板中的文本内容写入到文档——备注中，方便全局检索
+// Save when saving defaults to writing the text content of the whiteboard into the document
+// note, making it easy to search globally
 window._allowSetMemo = true;
-// 默认关闭悬浮预览
-window._allowPreview = !1;
-// 是否默认开启自动保存
+// Default off floating preview
+window._allowPreview = false;
+// Whether to default on auto-save
 window._autoSave = true;
-// 初始渲染时触发的那次自动保存没有必要，去掉，减少性能消耗
+// The initial rendering triggers no need for the first auto-save, reducing performance consumption
 window._state = false;
 if (window._autoSave) {
   window._state = true;
   window._autoSave = !window._autoSave;
 }
-// 复制内容到剪切板
+// Copy content to clipboard
 function patseIntoClipboard(txt) {
   let status = false
   const input = document.createElement('textarea')
@@ -103,7 +127,7 @@ async function getElementIDFromClipboadr() {
   let status = patseIntoClipboard(`excalidraw://${id}`);
   showMessage(window._languages["msgCopied"])
 }
-// 快捷键
+// Keyboard shortcuts
 document.addEventListener("keydown", (e => {
   if (e.altKey && "q" === e.key) {
     window._allowPreview = !0;
@@ -124,7 +148,7 @@ document.addEventListener("keydown", (e => {
   if (e.ctrlKey && e.key === "j") {
     getElementIDFromClipboadr();
   }
-  // 全屏
+  // Full Screen
   if (e.altKey && "y" === e.key) {
     if (window?.frameElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.contains("protyle")) {
       if (window?.frameElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.contains("fullscreen")) {
@@ -135,16 +159,16 @@ document.addEventListener("keydown", (e => {
     }
   }
 }), !0);
-// 手动保存
+// Manual Saving
 saveBtn.addEventListener('click', (e) => {
   if (window._isDarwin) {
-    // macOS上的保存
+    // Saving on macOS
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "S", metaKey: true, bubbles: true }));
   } else {
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "S", ctrlKey: true, bubbles: true }));
   }
 }, false);
-// 搜素关键字
+//  Search keywords
 (async () => {
   function request(url, data = null) { return new Promise((resolve, reject) => { fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data), }).then((data) => resolve(data.json()), (error) => { reject(error); }).catch((err) => { console.error("请求失败:", err); }); }); }
   ; const searchPanel = document.getElementById("searchPanel"),
